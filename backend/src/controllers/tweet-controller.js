@@ -43,6 +43,17 @@ async function getAllTweets(req, res) {
     }
 }
 
+async function getTweetsByUser(req, res) {
+    try {
+        const tweets = await TweetService.getTweetsByUserId(req.params.userId);
+        SuccessResponse.data = tweets;
+        return res.status(StatusCodes.OK).json(SuccessResponse);
+    } catch (error) {
+        ErrorResponse.message = error.message;
+        return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+    }
+}
+
 async function updateTweet(req, res) {
     try {
         const updatedTweet = await TweetService.updateTweet(req.params.id, req.body, req.user.id);
@@ -108,6 +119,7 @@ module.exports = {
     createTweet,
     getTweet,
     getAllTweets,
+    getTweetsByUser,
     updateTweet,
     deleteTweet,
     likeTweet,

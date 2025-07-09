@@ -64,5 +64,11 @@ router.post(
   TweetController.addComment
 );
 
+// Get tweets by user ID
+router.get(
+  '/user/:userId',
+  checkAuth,
+  TweetController.getTweetsByUser
+);
 
 module.exports = router;

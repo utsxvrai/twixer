@@ -36,6 +36,15 @@ async function getAllTweets(_id){
     }
 }
 
+async function getTweetsByUserId(userId) {
+  try {
+    const tweets = await tweetRepository.getTweetsByUser(userId);
+    return tweets;
+  } catch (error) {
+    throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+  }
+}
+
 async function updateTweet(id, data, currentUser) {
     try {
         const tweet = await tweetRepository.get(id);
@@ -69,7 +78,7 @@ async function likeTweet(tweetId, userId) {
   const tweet = await tweetRepository.get(tweetId);
 
   if (tweet.likes.includes(userId)) {
-    throw new AppError(StatusCodes.BAD_REQUEST, 'Already liked');
+    throw new AppError('Already liked', StatusCodes.BAD_REQUEST);
   }
 
   tweet.likes.push(userId);
@@ -112,6 +121,7 @@ module.exports = {
     create,
     getTweet,
     getAllTweets,
+    getTweetsByUserId,
     updateTweet,
     deleteTweet,
     likeTweet,
