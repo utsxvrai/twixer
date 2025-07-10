@@ -1,37 +1,40 @@
 const express = require("express");
-const { ServerConfig , Logger} = require('./config');
-const connectDB = require('./config/db-config');
-const swaggerUi = require('swagger-ui-express');
-const swaggerAutogen = require('swagger-autogen')();
-const cors = require('cors');
-// Enable CORS
+const http = require("http");
+const cors = require("cors");
+const swaggerUi = require("swagger-ui-express");
+
+const connectDB = require("./config/db-config");
+const { ServerConfig, Logger } = require("./config");
+const { initSocket } = require("./sockets"); // Use correct relative path
+const apiRoutes = require("./routes");
 
 const app = express();
-const apiRoutes = require('./routes');
+const server = http.createServer(app); // attach app to HTTP server
+
+// 🌍 Enable CORS
 app.use(cors({
-  origin: ServerConfig.CORS_ORIGIN || 'http://localhost:3000',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token']
+  origin: ServerConfig.CORS_ORIGIN || "http://localhost:3000",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-access-token"],
 }));
 
-const doc = {
-  info: {
-    title: 'My API',
-    description: 'Description'
-  },
-  host: 'localhost:4000'
-};
+// 📦 Middleware
+app.use(express.json());
 
-const outputFile = './swagger-output.json';
-const routes = ['./src/routes/index.js'];
+// 🚏 Routes
+app.use("/api", apiRoutes);
 
-swaggerAutogen(outputFile, routes, doc).then(() => {
-  app.use(express.json());
-  app.use('/api', apiRoutes);
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(require('./swagger-output.json')));
-  connectDB();
-  app.listen(ServerConfig.PORT, () => {
-    console.log(`Listening on port ${ServerConfig.PORT}`);
-    Logger.info("Successfully started the Server", {});
-  });
+// 📘 Swagger Docs
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(require("./swagger-output.json")));
+
+// 🧠 Connect to DB
+connectDB();
+
+// 🔌 Socket.IO
+initSocket(server); 
+
+// 🚀 Start server
+server.listen(ServerConfig.PORT, () => {
+  console.log(`Server listening on port ${ServerConfig.PORT}`);
+  Logger.info("Successfully started the Server", {});
 });

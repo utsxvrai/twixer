@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-// Placeholder for Heroicons or similar
-import { HomeIcon, UserCircleIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline'; 
+import { SunIcon, MoonIcon } from '@heroicons/react/24/outline'; 
 
 const NavBar = () => {
   const { user, logout } = useAuth();
@@ -33,15 +32,10 @@ const NavBar = () => {
           <button onClick={toggleDarkMode} className="text-gray-700 dark:text-gray-300 focus:outline-none">
             {darkMode ? <SunIcon className="h-6 w-6" /> : <MoonIcon className="h-6 w-6" />}
           </button>
-          {user && (
+          {user ? (
             <>
-              <Link to="/" className="text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 flex items-center space-x-1">
-                <HomeIcon className="h-5 w-5" />
-                <span>Home</span>
-              </Link>
-              <Link to={`/profile/${user._id}`} className="text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 flex items-center space-x-1">
-                <UserCircleIcon className="h-5 w-5" />
-                <span>Profile</span>
+              <Link to={`/profile/${user._id}`} className="text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400">
+                Profile
               </Link>
               <button
                 onClick={logout}
@@ -50,8 +44,7 @@ const NavBar = () => {
                 Logout
               </button>
             </>
-          )}
-          {!user && (
+          ) : (
             <>
               <Link to="/login" className="text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400">
                 Login
@@ -67,4 +60,4 @@ const NavBar = () => {
   );
 };
 
-export default NavBar; 
+export default NavBar;

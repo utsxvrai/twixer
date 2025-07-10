@@ -3,11 +3,13 @@ import { HomeIcon, BellIcon, ChatBubbleLeftIcon, BookmarkIcon, UserIcon, Ellipsi
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDarkMode } from '../context/DarkModeContext';
+import { useNotification } from '../context/NotificationContext';
 
 const Sidebar = () => {
   const { user } = useAuth();
   const location = useLocation();
   const { darkMode, toggleDarkMode } = useDarkMode();
+  const { hasNewNotification } = useNotification();
 
   const navItems = [
     { name: 'Home', icon: HomeIcon, path: '/' },
@@ -20,7 +22,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="md:w-20 lg:w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 p-4 sticky top-0 h-screen hidden md:flex flex-col items-center lg:items-start z-20">
+    <div className="md:w-80 lg:w-84 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 p-4 sticky top-0 h-screen hidden md:flex flex-col items-center lg:items-start z-20">
       <div className="text-blue-500 text-4xl font-extrabold mb-10 pl-2 hidden lg:block">Twixer</div>
       <div className="text-blue-500 text-3xl font-extrabold mb-10 block lg:hidden">T</div>
       <nav className="flex-grow w-full">
@@ -33,9 +35,12 @@ const Sidebar = () => {
                   ${location.pathname === item.path || (item.name === 'Profile' && location.pathname.startsWith('/profile')) 
                     ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-md' 
                     : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
-                  } justify-center lg:justify-start`}
+                  } justify-center lg:justify-start relative`}
               >
-                <item.icon className="h-8 w-8 lg:mr-4 transform transition-transform duration-200 group-hover:scale-110" />
+                <item.icon className="h-8 w-8 lg:mr-4 transform transition-transform duration-200 group-hover:scale-110 relative" />
+                {item.name === 'Notifications' && hasNewNotification && (
+                  <span className="absolute left-8 top-2 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 animate-pulse z-30"></span>
+                )}
                 <span className="hidden lg:inline text-xl font-semibold transition-colors duration-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">{item.name}</span>
               </Link>
             </li>
@@ -74,4 +79,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar; 
+export default Sidebar;

@@ -2,11 +2,14 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { DarkModeProvider } from './context/DarkModeContext';
+import { NotificationProvider } from './context/NotificationContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
-import Sidebar from './components/Sidebar';
+import TweetPage from './pages/TweetPage';
+import NotificationPage from './pages/NotificationPage';
+import MainLayout from './components/MainLayout';
 import MobileBottomNav from './components/MobileBottomNav';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -26,9 +29,8 @@ function App() {
     <Router>
       <AuthProvider>
         <DarkModeProvider>
-          <div className="flex flex-col md:flex-row min-h-screen bg-gray-100 dark:bg-gray-900">
-            <Sidebar />
-            <main className="flex-grow w-full lg:max-w-[600px] lg:mx-auto border-x border-gray-200 dark:border-gray-700 pb-16 md:pb-0">
+          <NotificationProvider>
+            <MainLayout>
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
@@ -49,14 +51,22 @@ function App() {
                   }
                 />
                 <Route path="/explore" element={<PrivateRoute><div className="p-4 text-gray-900 dark:text-white">Explore Page</div></PrivateRoute>} />
-                <Route path="/notifications" element={<PrivateRoute><div className="p-4 text-gray-900 dark:text-white">Notifications Page</div></PrivateRoute>} />
+                <Route path="/notifications" element={<PrivateRoute><NotificationPage /></PrivateRoute>} />
                 <Route path="/messages" element={<PrivateRoute><div className="p-4 text-gray-900 dark:text-white">Messages Page</div></PrivateRoute>} />
                 <Route path="/bookmarks" element={<PrivateRoute><div className="p-4 text-gray-900 dark:text-white">Bookmarks Page</div></PrivateRoute>} />
                 <Route path="/more" element={<PrivateRoute><div className="p-4 text-gray-900 dark:text-white">More Page</div></PrivateRoute>} />
+                <Route
+                  path="/tweet/:tweetId"
+                  element={
+                    <PrivateRoute>
+                      <TweetPage />
+                    </PrivateRoute>
+                  }
+                />
               </Routes>
-            </main>
-            <MobileBottomNav />
-          </div>
+              <MobileBottomNav />
+            </MainLayout>
+          </NotificationProvider>
         </DarkModeProvider>
       </AuthProvider>
       <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />

@@ -30,6 +30,18 @@ const getMe = () => {
   return axiosInstance.get(`${USER_API_URL}/me`);
 };
 
+const searchUsers = (query) => {
+  return axiosInstance.get(`${USER_API_URL}/search?q=${encodeURIComponent(query)}`);
+};
+
+const getNotifications = () => {
+  return axiosInstance.get('/user/notifications');
+};
+
+const getUserProfile = (userId) => {
+  return axiosInstance.get(`/user/profile/${userId}`);
+};
+
 const UserService = {
   register,
   login,
@@ -38,6 +50,9 @@ const UserService = {
   followUser,
   unfollowUser,
   getMe,
+  searchUsers,
+  getNotifications,
+  getUserProfile,
 };
 
 export default UserService;

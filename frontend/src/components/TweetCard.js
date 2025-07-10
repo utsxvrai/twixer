@@ -137,21 +137,36 @@ const TweetCard = ({ tweet, onDeleteTweet, onEditTweet }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-4 transition-all duration-200 ease-in-out hover:bg-gray-50 dark:hover:bg-gray-800 rounded-2xl shadow-sm hover:shadow-md mb-4 last:mb-0">
-      <div className="flex items-start space-x-3">
+    <div
+      className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-md px-6 py-5 transition-all duration-200 ease-in-out hover:bg-gray-50 dark:hover:bg-gray-800 mb-4 last:mb-0 cursor-pointer"
+      onClick={(e) => {
+        // Only navigate if the click is not on an interactive element
+        if (
+          e.target.closest('.tweet-action-btn') ||
+          e.target.closest('a') ||
+          e.target.tagName === 'BUTTON' ||
+          e.target.tagName === 'INPUT' ||
+          e.target.tagName === 'TEXTAREA'
+        ) {
+          return;
+        }
+        window.location.href = `/tweet/${tweet._id}`;
+      }}
+    >
+      <div className="flex items-start space-x-4">
         <Link to={`/profile/${tweet.author._id}`} className="flex-shrink-0 group">
-          <div className="w-12 h-12 rounded-full bg-blue-400 flex items-center justify-center text-white text-xl font-bold border-2 border-white transform transition-transform duration-200 group-hover:scale-105">
+          <div className="w-12 h-12 rounded-full bg-blue-400 flex items-center justify-center text-white text-2xl font-bold border-2 border-white transform transition-transform duration-200 group-hover:scale-105">
             {tweet.author.name ? tweet.author.name.charAt(0).toUpperCase() : 'U'}
           </div>
         </Link>
         <div className="flex-grow">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-1">
-              <Link to={`/profile/${tweet.author._id}`} className="font-bold text-gray-900 dark:text-white hover:underline text-lg">
-                {tweet.author.name || 'Unknown User'}
+            <div className="flex items-center space-x-2">
+              <Link to={`/profile/${tweet.author?._id}`} className="font-bold text-gray-900 dark:text-white hover:underline text-lg">
+                {tweet.author?.name || 'Unknown User'}
               </Link>
-              <span className="text-gray-500 dark:text-gray-400 text-sm">@{tweet.author?.email?.split('@')[0] || 'unknown'}</span>
-              <span className="text-gray-500 dark:text-gray-400 text-sm">· {new Date(tweet.createdAt).toLocaleDateString()}</span>
+              <span className="text-gray-500 dark:text-gray-400 text-base">@{tweet.author?.username || 'unknown'}</span>
+              <span className="text-gray-500 dark:text-gray-400 text-base">· {new Date(tweet.createdAt).toLocaleDateString()}</span>
             </div>
             {isAuthor && (
               <div className="flex space-x-2">
@@ -172,47 +187,43 @@ const TweetCard = ({ tweet, onDeleteTweet, onEditTweet }) => {
               </div>
             )}
           </div>
-
           {isEditing ? (
             <textarea
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white mb-2 text-base"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white mb-2 text-lg"
               rows="3"
               value={editedContent}
               onChange={(e) => setEditedContent(e.target.value)}
             ></textarea>
           ) : (
-            <p className="text-gray-900 dark:text-gray-100 mt-1 mb-2 text-base leading-relaxed">{tweet.content}</p>
+            <p className="text-gray-900 dark:text-gray-100 mt-2 mb-2 text-lg leading-relaxed">{tweet.content}</p>
           )}
-
           {tweet.image && (
             <div className="my-3 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md">
               <img src={tweet.image} alt="Tweet content" className="w-full h-auto object-cover" />
             </div>
           )}
-
           <div className="flex justify-between items-center text-gray-500 dark:text-gray-400 mt-3 border-t border-gray-100 dark:border-gray-700 pt-2">
-            <button onClick={handleLike} className={`flex items-center space-x-1 p-2 rounded-full transition-all duration-200 group 
+            <button onClick={handleLike} className={`tweet-action-btn flex items-center space-x-1 p-2 rounded-full transition-all duration-200 group z-10
               ${isLiked 
                 ? 'text-red-500 bg-red-50 dark:bg-red-900/20 transform scale-110' 
                 : 'hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-red-500 group-hover:scale-110'}
-              `}>
+              `} style={{zIndex: 10}}>
               {isLiked ? <SolidHeartIcon className="h-5 w-5 transform transition-transform duration-200 group-hover:scale-125" /> : <OutlineHeartIcon className="h-5 w-5 transform transition-transform duration-200 group-hover:scale-125" />}
-              <span className="text-sm transition-all duration-200 group-hover:font-semibold">{likesCount}</span>
+              <span className="text-base transition-all duration-200 group-hover:font-semibold">{likesCount}</span>
             </button>
-            <button onClick={() => setShowComments(!showComments)} className="flex items-center space-x-1 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-500 transition-all duration-200 group">
+            <button onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }} className="tweet-action-btn flex items-center space-x-1 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-500 transition-all duration-200 group z-10" style={{zIndex: 10}}>
               <ChatBubbleLeftIcon className="h-5 w-5 transform transition-transform duration-200 group-hover:scale-125" />
-              <span className="text-sm transition-all duration-200 group-hover:font-semibold">{comments.length}</span>
+              <span className="text-base transition-all duration-200 group-hover:font-semibold">{comments.length}</span>
             </button>
-            <button className="flex items-center space-x-1 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-green-500 transition-all duration-200 group">
+            <button className="tweet-action-btn flex items-center space-x-1 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-green-500 transition-all duration-200 group z-10" style={{zIndex: 10}}>
               <ArrowPathIcon className="h-5 w-5 transform transition-transform duration-200 group-hover:rotate-45 group-hover:scale-125" />
-              <span className="text-sm transition-all duration-200 group-hover:font-semibold">0</span>
+              <span className="text-base transition-all duration-200 group-hover:font-semibold">0</span>
             </button>
-            <button className="flex items-center space-x-1 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-500 transition-all duration-200 group">
+            <button className="tweet-action-btn flex items-center space-x-1 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-500 transition-all duration-200 group z-10" style={{zIndex: 10}}>
               <ChartBarIcon className="h-5 w-5 transform transition-transform duration-200 group-hover:scale-125" />
-              <span className="text-sm transition-all duration-200 group-hover:font-semibold">0</span>
+              <span className="text-base transition-all duration-200 group-hover:font-semibold">0</span>
             </button>
           </div>
-
           {showComments && (
             <div className="mt-4">
               <CommentBox tweetId={tweet._id} onNewComment={handleNewComment} />
@@ -220,21 +231,21 @@ const TweetCard = ({ tweet, onDeleteTweet, onEditTweet }) => {
                 {comments.length > 0 ? (
                   comments.map(comment => (
                     <div key={comment._id} className="flex items-start space-x-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg shadow-inner">
-                      <div className="w-8 h-8 rounded-full bg-blue-300 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 border border-white">
-                        {comment.author?.name ? comment.author.name.charAt(0).toUpperCase() : 'U'}
+                      <div className="w-8 h-8 rounded-full bg-blue-300 flex items-center justify-center text-white text-base font-bold flex-shrink-0 border border-white">
+                        {comment.user?.name ? comment.user.name.charAt(0).toUpperCase() : 'U'}
                       </div>
                       <div>
                         <div className="flex items-center space-x-1">
-                          <span className="font-bold text-gray-900 dark:text-white text-sm">{comment.author?.name || 'Unknown User'}</span>
-                          <span className="text-gray-500 dark:text-gray-400 text-xs">@{comment.author?.email?.split('@')[0] || 'unknown'}</span>
+                          <span className="font-bold text-gray-900 dark:text-white text-base">{comment.user?.name || 'Unknown User'}</span>
+                          <span className="text-gray-500 dark:text-gray-400 text-xs">@{comment.user?.username || 'unknown'}</span>
                           <span className="text-gray-500 dark:text-gray-400 text-xs">· {new Date(comment.createdAt).toLocaleDateString()}</span>
                         </div>
-                        <p className="text-gray-800 dark:text-gray-200 mt-0.5 text-sm">{comment.content}</p>
+                        <p className="text-gray-800 dark:text-gray-200 mt-0.5 text-base">{comment.text}</p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-gray-500 dark:text-gray-400 text-sm py-2">No comments yet. Be the first to reply!</p>
+                  <p className="text-center text-gray-500 dark:text-gray-400 text-base py-2">No comments yet. Be the first to reply!</p>
                 )}
               </div>
             </div>
@@ -245,4 +256,4 @@ const TweetCard = ({ tweet, onDeleteTweet, onEditTweet }) => {
   );
 };
 
-export default TweetCard; 
+export default TweetCard;

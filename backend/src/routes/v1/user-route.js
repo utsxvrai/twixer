@@ -26,6 +26,9 @@ router.get('/users',
     UserController.getAllUsers
 );
 
+// Search users by name or username
+router.get('/search', checkAuth, UserController.searchUsers);
+
 // Protected route example
 router.get('/me', checkAuth, (req, res) => {
     res.json({
@@ -42,5 +45,11 @@ router.post('/unfollow/:id',
     checkAuth,
     UserController.unfollowUser
 );
+
+// Get all notifications for the logged-in user
+router.get('/notifications', checkAuth, UserController.getNotifications);
+
+// Lightweight user profile endpoint
+router.get('/profile/:id', checkAuth, UserController.getUserProfile);
 
 module.exports = router;

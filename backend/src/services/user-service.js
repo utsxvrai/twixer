@@ -3,6 +3,7 @@ const {UserRepository} = require('../repositories');
 const AppError = require('../utils/errors/app-error');
 const bcrypt = require('bcrypt');
 const { createToken, verifyToken } = require('../utils/common/auth');
+const { publisher } = require('../config/redis-config');
 
 const userRepository = new UserRepository();
 
@@ -109,6 +110,16 @@ async function followUser(currentUserId, targetUserId) {
 
     await currentUser.save();
     await targetUser.save();
+    
+    await publisher.publish('notifications', JSON.stringify({
+      type: 'follow',
+      targetUserId,
+      payload: {
+        followerId: currentUser._id,
+        followerName: currentUser.name,
+        followerUsername: currentUser.username
+      }
+    }));
 }
 
 
@@ -128,6 +139,17 @@ async function unfollowUser(currentUserId, targetUserId) {
   await targetUser.save();
 }
 
+async function searchUsers(query) {
+    if (!query) return [];
+    // Search by name or username (case-insensitive)
+    return await userRepository.model.find({
+        $or: [
+            { name: { $regex: query, $options: 'i' } },
+            { username: { $regex: query, $options: 'i' } }
+        ]
+    }).select('name username profilePicture');
+}
+
 
 module.exports = {
     create,
@@ -138,7 +160,8 @@ module.exports = {
     destroy,
     isAuthenticated,
     followUser,
-    unfollowUser
+    unfollowUser,
+    searchUsers
 };
 
 

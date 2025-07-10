@@ -3,16 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import TweetService from '../api/tweet-service';
 import TweetCard from '../components/TweetCard';
 import TweetInputBox from '../components/TweetInputBox';
-import RightSidebar from '../components/RightSidebar';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
   const { user, logout } = useAuth();
   const [tweets, setTweets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const getTweets = async () => {
@@ -58,29 +54,22 @@ const HomePage = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
-      <div className="flex-grow border-x border-gray-200 dark:border-gray-700 max-w-[600px] mx-auto bg-white dark:bg-gray-900">
-        <div className="border-b border-gray-200 dark:border-gray-700 px-4 py-3 sticky top-0 bg-white dark:bg-gray-900 z-10">
-          <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">Home</h2>
-        </div>
-
-        {user && (
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <TweetInputBox onNewTweet={handleNewTweet} />
-          </div>
-        )}
-
-        <div className="mt-0">
-          {tweets.length > 0 ? (
-            tweets.map((tweet) => <TweetCard key={tweet._id} tweet={tweet} onDeleteTweet={handleDeleteTweet} onEditTweet={handleEditTweet} />)
-          ) : (
-            <p className="text-center text-gray-600 dark:text-gray-400 p-4">No tweets yet. Be the first to post!</p>
-          )}
-        </div>
+    <div className="w-full max-w-10xl mt-2 space-y-4">
+      <div className="border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 px-6 py-4 sticky top-0 z-10">
+        <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white">Home</h2>
       </div>
-      <RightSidebar />
+      {user && (
+        <TweetInputBox onNewTweet={handleNewTweet} />
+      )}
+      <div>
+        {tweets.length > 0 ? (
+          tweets.map((tweet) => <TweetCard key={tweet._id} tweet={tweet} onDeleteTweet={handleDeleteTweet} onEditTweet={handleEditTweet} />)
+        ) : (
+          <p className="text-center text-gray-600 dark:text-gray-400 p-4">No tweets yet. Be the first to post!</p>
+        )}
+      </div>
     </div>
   );
 };
 
-export default HomePage; 
+export default HomePage;

@@ -42,7 +42,32 @@ const user = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    
+    notifications: [
+        {
+            type: {
+                type: String, // 'follow', 'like', 'comment'
+                required: true
+            },
+            fromUser: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User',
+                required: true
+            },
+            tweet: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Tweet',
+                default: null
+            },
+            message: {
+                type: String,
+                required: true
+            },
+            createdAt: {
+                type: Date,
+                default: Date.now
+            }
+        }
+    ]
 })
 
 module.exports = mongoose.model('User', user)

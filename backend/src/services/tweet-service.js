@@ -3,6 +3,7 @@ const  { TweetRepository } = require('../repositories');
 const AppError = require('../utils/errors/app-error');
 const Comment = require('../models/comment');
 const User = require('../models/user')
+const { publisher } = require('../config/redis-config');
 
 
 
@@ -20,7 +21,14 @@ async function create(data){
 
 async function getTweet(id) {
     try {
-        const tweet = await tweetRepository.get(id);
+        // Populate author and comments (with user info)
+        const tweet = await tweetRepository.model.findById(id)
+            .populate('author', 'username name profilePicture')
+            .populate({
+                path: 'comments',
+                populate: { path: 'user', select: 'username name profilePicture' }
+            });
+        if (!tweet) throw new AppError(StatusCodes.NOT_FOUND, 'Tweet not found');
         return tweet;
     } catch (error) {
         throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
@@ -76,13 +84,26 @@ async function deleteTweet(id, currentUser) {
 
 async function likeTweet(tweetId, userId) {
   const tweet = await tweetRepository.get(tweetId);
-
   if (tweet.likes.includes(userId)) {
     throw new AppError('Already liked', StatusCodes.BAD_REQUEST);
   }
-
   tweet.likes.push(userId);
   await tweet.save();
+
+  // Notify tweet author if not liking own tweet
+  if (tweet.author.toString() !== userId.toString()) {
+    const liker = await User.findById(userId);
+    await publisher.publish('notifications', JSON.stringify({
+      type: 'like',
+      targetUserId: tweet.author.toString(),
+      payload: {
+        tweetId: tweet._id,
+        likerId: liker._id,
+        likerName: liker.name,
+        likerUsername: liker.username
+      }
+    }));
+  }
   return tweet;
 }
 
@@ -105,11 +126,26 @@ async function addComment({ tweetId, userId, text }) {
       user: userId,
       text
     });
-
     const tweet = await tweetRepository.get(tweetId);
     tweet.comments.push(comment._id);
     await tweet.save();
 
+    // Notify tweet author if not commenting on own tweet
+    if (tweet.author.toString() !== userId.toString()) {
+      const commenter = await User.findById(userId);
+      await publisher.publish('notifications', JSON.stringify({
+        type: 'comment',
+        targetUserId: tweet.author.toString(),
+        payload: {
+          tweetId: tweet._id,
+          commentId: comment._id,
+          commenterId: commenter._id,
+          commenterName: commenter.name,
+          commenterUsername: commenter.username,
+          text
+        }
+      }));
+    }
     return comment;
   } catch (error) {
     throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
